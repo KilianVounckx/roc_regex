@@ -364,3 +364,14 @@ handleRegexParseError = \err ->
 
             {} <- Stderr.line msg |> Task.await
             Stderr.line "Error."
+
+        EscapeAtEnd ->
+            msg = "Escape at end of string"
+            {} <- Stderr.line msg |> Task.await
+            Stderr.line "Error."
+
+        UnterminatedBracketGroup AtIndex index ->
+            indexStr = Num.toStr index
+            msg = "Bracket group not terminated, started at index \(indexStr)"
+            {} <- Stderr.line msg |> Task.await
+            Stderr.line "Error."
