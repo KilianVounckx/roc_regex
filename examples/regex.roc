@@ -23,6 +23,8 @@ main =
     {} <- Stdout.line "-----------" |> Task.await
     {} <- Task.await task3
     {} <- Stdout.line "-----------" |> Task.await
+    {} <- Task.await task4
+    {} <- Stdout.line "-----------" |> Task.await
     Stdout.line "Done."
 
 task0 : Task {} []
@@ -153,6 +155,44 @@ task3 =
                             Stdout.line "Matched 'ab', but it shouldn't have"
                         else
                             Stdout.line "Didn't match 'ab'"
+                    )
+            Task.succeed {}
+
+        Err err -> handleRegexParseError err
+
+task4 : Task {} []
+task4 =
+    regex = "a+++++"
+    {} <- Stdout.line "Regex: '\(regex)'" |> Task.await
+    when Regex.fromStr regex is
+        Ok regex1 ->
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "a" then
+                            Stdout.line "Matched 'a'"
+                        else
+                            Stdout.line "Didn't match 'a', but it should have"
+                    )
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "aaaaa" then
+                            Stdout.line "Matched 'aaaaa'"
+                        else
+                            Stdout.line "Didn't match 'aaaaa', but it should have"
+                    )
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "" then
+                            Stdout.line "Matched '', but it shouldn't have"
+                        else
+                            Stdout.line "Didn't match ''"
+                    )
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "b" then
+                            Stdout.line "Matched 'b', but it shouldn't have"
+                        else
+                            Stdout.line "Didn't match 'b'"
                     )
             Task.succeed {}
 

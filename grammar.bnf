@@ -3,7 +3,7 @@ regex <- term '|' regex
 
 term <- factor*
 
-factor <- base '*'*
+factor <- base ('*'|'+')*
 
 base <- char
       | '\' char

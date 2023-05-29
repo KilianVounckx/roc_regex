@@ -40,10 +40,7 @@ regex : Parser U8 -> Result { newParser : Parser U8, regex : Regex U8 } (InnerPa
 regex = \parser ->
     { newParser: newParser1, regex: termParsed } <- term parser |> Result.try
     if more newParser1 && peek newParser1 == '|' then
-        newParser2 =
-            when eat newParser1 '|' is
-                Ok np2 -> np2
-                Err _ -> crash "unreachable"
+        newParser2 <- eat newParser1 '|' |> Result.try
         { newParser: newParser3, regex: regexParsed } <- regex newParser2 |> Result.map
         { newParser: newParser3, regex: OneOf termParsed regexParsed}
     else
@@ -61,7 +58,7 @@ term = \parser ->
             Ok { newParser: helpParser, regex: acc }
     helper parser Empty
 
-# factor <- base '*'*
+# factor <- base ('*'|'+')*
 factor : Parser U8 -> Result { newParser : Parser U8, regex : Regex U8 } (InnerParseError *)
 factor = \parser ->
     { newParser: newParser1, regex: baseParsed } <- base parser |> Result.try
@@ -71,6 +68,9 @@ factor = \parser ->
         if more helpParser && peek helpParser == '*' then
             helpParser1 <- eat helpParser '*' |> Result.try
             helper helpParser1 (Star acc)
+        else if more helpParser && peek helpParser == '+' then
+            helpParser1 <- eat helpParser '+' |> Result.try
+            helper helpParser1 (Pair acc (Star acc))
         else
             Ok { newParser: helpParser, regex: acc }
 
