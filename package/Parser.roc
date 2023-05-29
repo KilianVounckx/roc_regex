@@ -87,10 +87,7 @@ base : Parser U8 -> Result { newParser : Parser U8, regex : Regex U8 } (InnerPar
 base = \parser ->
     when peek parser is
         '(' ->
-            newParser1 =
-                when eat parser '(' is
-                    Ok np1 -> np1
-                    Err _ -> crash "unreachable"
+            newParser1 <- eat parser '(' |> Result.try
             { newParser: newParser2, regex: regexParsed } <- regex newParser1 |> Result.try
             newParser3 <- eat newParser2 ')' |> Result.map
             { newParser: newParser3, regex: regexParsed }
@@ -111,10 +108,7 @@ base = \parser ->
             { newParser: newParser2, chars } <- helper newParser1 [] |> Result.map
             { newParser: newParser2, regex: List.walk chars Fail \state, char -> OneOf state (Symbol char) }
         '\\' ->
-            newParser1 =
-                when eat parser '\\' is
-                    Ok np1 -> np1
-                    Err _ -> crash "unreachable"
+            newParser1 <- eat parser '\\' |> Result.try
             { newParser: newParser2, char: escaped } = next newParser1
             Ok { newParser: newParser2, regex: Symbol escaped }
         _ ->
