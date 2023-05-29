@@ -25,6 +25,12 @@ main =
     {} <- Stdout.line "-----------" |> Task.await
     {} <- Task.await task4
     {} <- Stdout.line "-----------" |> Task.await
+    {} <- Task.await task5
+    {} <- Stdout.line "-----------" |> Task.await
+    {} <- Task.await task6
+    {} <- Stdout.line "-----------" |> Task.await
+    {} <- Task.await task7
+    {} <- Stdout.line "-----------" |> Task.await
     Stdout.line "Done."
 
 task0 : Task {} []
@@ -193,6 +199,134 @@ task4 =
                             Stdout.line "Matched 'b', but it shouldn't have"
                         else
                             Stdout.line "Didn't match 'b'"
+                    )
+            Task.succeed {}
+
+        Err err -> handleRegexParseError err
+
+task5 : Task {} []
+task5 =
+    regex = "a?????"
+    {} <- Stdout.line "Regex: '\(regex)'" |> Task.await
+    when Regex.fromStr regex is
+        Ok regex1 ->
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "a" then
+                            Stdout.line "Matched 'a'"
+                        else
+                            Stdout.line "Didn't match 'a', but it should have"
+                    )
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "" then
+                            Stdout.line "Matched ''"
+                        else
+                            Stdout.line "Didn't match '', but it should have"
+                    )
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "aa" then
+                            Stdout.line "Matched 'aa', but it shouldn't have"
+                        else
+                            Stdout.line "Didn't match 'aa'"
+                    )
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "b" then
+                            Stdout.line "Matched 'b', but it shouldn't have"
+                        else
+                            Stdout.line "Didn't match 'b'"
+                    )
+            Task.succeed {}
+
+        Err err -> handleRegexParseError err
+
+task6 : Task {} []
+task6 =
+    regex = "[abc]"
+    {} <- Stdout.line "Regex: '\(regex)'" |> Task.await
+    when Regex.fromStr regex is
+        Ok regex1 ->
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "a" then
+                            Stdout.line "Matched 'a'"
+                        else
+                            Stdout.line "Didn't match 'a', but it should have"
+                    )
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "b" then
+                            Stdout.line "Matched 'b'"
+                        else
+                            Stdout.line "Didn't match 'b', but it should have"
+                    )
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "c" then
+                            Stdout.line "Matched 'c'"
+                        else
+                            Stdout.line "Didn't match 'c', but it should have"
+                    )
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "" then
+                            Stdout.line "Matched '', but it shouldn't have"
+                        else
+                            Stdout.line "Didn't match ''"
+                    )
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "ab" then
+                            Stdout.line "Matched 'ab', but it shouldn't have"
+                        else
+                            Stdout.line "Didn't match 'ab'"
+                    )
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "aa" then
+                            Stdout.line "Matched 'aa', but it shouldn't have"
+                        else
+                            Stdout.line "Didn't match 'aa'"
+                    )
+            Task.succeed {}
+
+        Err err -> handleRegexParseError err
+
+task7 : Task {} []
+task7 =
+    regex = "[\\[\\]]"
+    {} <- Stdout.line "Regex: '\(regex)'" |> Task.await
+    when Regex.fromStr regex is
+        Ok regex1 ->
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "[" then
+                            Stdout.line "Matched '['"
+                        else
+                            Stdout.line "Didn't match '[', but it should have"
+                    )
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "]" then
+                            Stdout.line "Matched ']'"
+                        else
+                            Stdout.line "Didn't match ']', but it should have"
+                    )
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "" then
+                            Stdout.line "Matched '', but it shouldn't have"
+                        else
+                            Stdout.line "Didn't match ''"
+                    )
+            {} <- Task.await
+                    (
+                        if Regex.matches regex1 "[]" then
+                            Stdout.line "Matched '[]', but it shouldn't have"
+                        else
+                            Stdout.line "Didn't match '[]'"
                     )
             Task.succeed {}
 

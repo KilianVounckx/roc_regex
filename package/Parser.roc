@@ -58,7 +58,7 @@ term = \parser ->
             Ok { newParser: helpParser, regex: acc }
     helper parser Empty
 
-# factor <- base ('*'|'+')*
+# factor <- base ('*'|'+'|'?')*
 factor : Parser U8 -> Result { newParser : Parser U8, regex : Regex U8 } (InnerParseError *)
 factor = \parser ->
     { newParser: newParser1, regex: baseParsed } <- base parser |> Result.try
@@ -71,6 +71,9 @@ factor = \parser ->
         else if more helpParser && peek helpParser == '+' then
             helpParser1 <- eat helpParser '+' |> Result.try
             helper helpParser1 (Pair acc (Star acc))
+        else if more helpParser && peek helpParser == '?' then
+            helpParser1 <- eat helpParser '?' |> Result.try
+            helper helpParser1 (OneOf Empty acc)
         else
             Ok { newParser: helpParser, regex: acc }
 
@@ -78,6 +81,7 @@ factor = \parser ->
 
 # base <- char
 #       | '\' char
+#       | '[' char* ']'
 #       | '(' regex ')'
 base : Parser U8 -> Result { newParser : Parser U8, regex : Regex U8 } (InnerParseError *)
 base = \parser ->
@@ -90,6 +94,22 @@ base = \parser ->
             { newParser: newParser2, regex: regexParsed } <- regex newParser1 |> Result.try
             newParser3 <- eat newParser2 ')' |> Result.map
             { newParser: newParser3, regex: regexParsed }
+        '[' ->
+            helper : Parser U8, List U8 -> Result { newParser : Parser U8, chars : List U8 } (InnerParseError *)
+            helper = \helpParser, acc ->
+                if more helpParser && peek helpParser == ']' then
+                    helpParser1 <- eat helpParser ']' |> Result.map
+                    { newParser: helpParser1, chars: acc }
+                else if more helpParser && peek helpParser == '\\' then
+                    helpParser1 <- eat helpParser '\\' |> Result.try
+                    { newParser: helpParser2, char } = next helpParser1
+                    helper helpParser2 (List.append acc char)
+                else
+                    { newParser: helpParser1, char } = next helpParser
+                    helper helpParser1 (List.append acc char)
+            newParser1 <- eat parser '[' |> Result.try
+            { newParser: newParser2, chars } <- helper newParser1 [] |> Result.map
+            { newParser: newParser2, regex: List.walk chars Fail \state, char -> OneOf state (Symbol char) }
         '\\' ->
             newParser1 =
                 when eat parser '\\' is
