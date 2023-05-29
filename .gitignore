@@ -5,3 +5,4 @@
 !package/**/*.roc
 !examples/**/*.roc
 !grammar.bnf
+!README.md
